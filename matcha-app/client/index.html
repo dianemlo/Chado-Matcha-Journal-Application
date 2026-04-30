@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>茶処 Matcha Journal</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;600&family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- ── Navigation ── -->
+  <nav class="nav" role="navigation" aria-label="Main navigation">
+    <a href="#" class="nav-brand" onclick="showView('feed')" aria-label="Matcha Journal home">
+      茶処 <span class="nav-brand-sub">Matcha Journal</span>
+    </a>
+    <div class="nav-links" id="nav-links">
+      <span class="nav-user" id="nav-user" aria-live="polite"></span>
+      <button class="nav-btn nav-btn-primary" id="nav-add-btn" onclick="showView('add')" style="display:none" aria-label="Add new matcha entry">+ Add Entry</button>
+      <button class="nav-btn" id="nav-logout-btn" onclick="handleLogout()" style="display:none">Logout</button>
+      <button class="nav-btn" id="nav-login-btn" onclick="showView('auth')">Login</button>
+    </div>
+  </nav>
+
+  <!-- ── Global message banner ── -->
+  <div class="msg" id="global-msg" role="alert" aria-live="polite"></div>
+
+  <!-- ══════════════════════════════════════
+       VIEW: FEED
+  ══════════════════════════════════════ -->
+  <main id="view-feed" class="view active" aria-label="Matcha reviews feed">
+    <div class="container">
+      <header class="feed-header">
+        <div>
+          <h1 class="feed-title">Matcha Places</h1>
+          <p class="feed-subtitle">A personal journal of matcha experiences.</p>
+        </div>
+        <div class="feed-header-deco" aria-hidden="true">
+          <img src="assets/matcha-app-character.png" alt="matcha journal character" class="header-character">
+        </div>
+      </header>
+
+      <!-- Controls -->
+      <div class="controls" role="group" aria-label="Sort and filter options">
+        <div class="control-group">
+          <label for="sort-select" class="control-label">Sort</label>
+          <select id="sort-select" class="control-select" onchange="loadFeed()" aria-label="Sort entries by">
+            <option value="date">Newest first</option>
+            <option value="rating">Highest rated</option>
+            <option value="name">Name (A–Z)</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label for="filter-type" class="control-label">Filter</label>
+          <select id="filter-type" class="control-select" onchange="loadFeed()" aria-label="Filter by drink type">
+            <option value="">All types</option>
+            <option value="ceremonial">Ceremonial</option>
+            <option value="latte">Latte</option>
+            <option value="soft serve">Soft serve</option>
+            <option value="dessert">Dessert</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Feed grid -->
+      <div class="card-grid" id="feed-grid" aria-label="Matcha entries"></div>
+    </div>
+  </main>
+
+  <!-- ══════════════════════════════════════
+       VIEW: AUTH (Login / Sign up)
+  ══════════════════════════════════════ -->
+  <main id="view-auth" class="view" aria-label="Login and sign up">
+    <div class="container container-narrow">
+      <div class="form-card">
+        <h2 class="form-card-title">Welcome</h2>
+        <p class="form-card-sub">Sign in to add and manage your matcha reviews.</p>
+
+        <div class="tab-row" role="tablist" aria-label="Login or sign up">
+          <button class="tab active" id="tab-login" role="tab" aria-selected="true" onclick="switchAuthTab('login')">Login</button>
+          <button class="tab" id="tab-signup" role="tab" aria-selected="false" onclick="switchAuthTab('signup')">Sign up</button>
+        </div>
+
+        <div class="msg" id="auth-msg" role="alert" aria-live="polite"></div>
+
+        <form id="auth-form" novalidate>
+          <div class="form-group">
+            <label class="form-label" for="auth-username">Username</label>
+            <input class="form-input" type="text" id="auth-username" name="username" autocomplete="username" placeholder="your_username" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="auth-password">Password</label>
+            <input class="form-input" type="password" id="auth-password" name="password" autocomplete="current-password" placeholder="••••••••" required>
+          </div>
+          <button type="submit" class="btn btn-primary btn-full" id="auth-submit-btn">Login</button>
+        </form>
+
+        <div class="form-card-footer">
+          <button class="link-btn" onclick="showView('feed')">← Back to feed</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ══════════════════════════════════════
+       VIEW: ADD ENTRY
+  ══════════════════════════════════════ -->
+  <main id="view-add" class="view" aria-label="Add new matcha entry">
+    <div class="container cont
+    ainer-narrow">
+      <div class="form-card">
+        <h2 class="form-card-title" id="add-form-title">New Matcha Entry</h2>
+        <p class="form-card-sub" id="add-form-sub">Share a place you've visited.</p>
+
+        <div class="msg" id="add-msg" role="alert" aria-live="polite"></div>
+
+        <form id="add-form" novalidate>
+          <input type="hidden" id="edit-id">
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="f-place">Place name <span class="required" aria-label="required">*</span></label>
+              <input class="form-input" type="text" id="f-place" placeholder="e.g. Matcha Cafe Maiko" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="f-location">Location <span class="required" aria-label="required">*</span></label>
+              <input class="form-input" type="text" id="f-location" placeholder="City, State" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="f-type">Drink type</label>
+              <select class="form-input" id="f-type">
+                <option value="ceremonial">Ceremonial</option>
+                <option value="latte" selected>Latte</option>
+                <option value="soft serve">Soft serve</option>
+                <option value="dessert">Dessert</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="f-price">Price ($)</label>
+              <input class="form-input" type="number" id="f-price" min="0" step="0.01" placeholder="Optional">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" id="rating-label">Rating <span class="required" aria-label="required">*</span></label>
+            <div class="star-picker" id="star-picker" role="radiogroup" aria-labelledby="rating-label">
+              <button type="button" class="star lit" data-v="1" role="radio" aria-checked="false" aria-label="1 star">★</button>
+              <button type="button" class="star lit" data-v="2" role="radio" aria-checked="false" aria-label="2 stars">★</button>
+              <button type="button" class="star lit" data-v="3" role="radio" aria-checked="true"  aria-label="3 stars">★</button>
+              <button type="button" class="star"     data-v="4" role="radio" aria-checked="false" aria-label="4 stars">★</button>
+              <button type="button" class="star"     data-v="5" role="radio" aria-checked="false" aria-label="5 stars">★</button>
+            </div>
+            <input type="hidden" id="f-rating" value="3">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="f-notes">Tasting notes</label>
+            <textarea class="form-input form-textarea" id="f-notes" maxlength="500" placeholder="Describe the flavor, vibe, atmosphere..."></textarea>
+          </div>
+
+          <div class="btn-row">
+            <button type="submit" class="btn btn-primary" id="add-submit-btn">Add Entry</button>
+            <button type="button" class="btn btn-ghost" onclick="cancelEdit()">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
